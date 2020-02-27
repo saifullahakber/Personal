@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Weather Dashboard</title>
+  </head>
+
+  <body>
+     
+      <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1 class="text-center">Australia temperature dashboard</h1>
+                <p class="text-center">Based on Open Weather Report (https://openweathermap.org)</p>
+            </div>
+            <div class="col-sm-12">
+                <form>
+                    <label>Please select your region:</label>
+                    <select id="region">
+                        <option value="lat=-33.865143&lon=151.209900">NSW</option>
+                        <option value="lat=-35.282001&lon=149.128998">ACT</option>
+                        <option value="lat=-20.917574&lon=142.702789">QLD</option>
+                    </select>
+                </form>
+            </div>
+            <div class="col-sm-12">
+               <canvas id="myChart"></canvas>
+            </div>
+          
+          </div>
+      </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+      
+          
+    <script type="application/javascript">
+    (function($){
+         function getData(url, handleData) {
+                $.ajax({
+                url: url,
+                type: "GET",
+                dataType: "jsonp",
+                success: function (data) {   
+                        handleData(data)
+                },
+                error: function (error) {
+                    console.log('Connection error');
+                }
+            });  
+     
+        } 
+          
+      
+   
+        
+        function getTemp(){
+         var dataset=[];
+            var time=[];
+            var celciustemp=[];
+            var regionval = $('#region option:selected').val();
+    
+            getData("http://api.openweathermap.org/data/2.5/forecast?"+ regionval +"&cnt=7&appid=fdd016f8d00bb58ba175255bde1610ea", function(output){
+                $.map(output.list, function(data){ 
+                    dataset.push(data.wind.speed);
+                    time.push(data.dt_txt);
+                    var kelvintocelcius = Math.ceil(data.main.temp - 273.15);
+                    celciustemp.push(kelvintocelcius)
+                });
+            console.log(celciustemp)
+                
+                 var ctx = document.getElementById('myChart').getContext('2d');
+                    var chart = new Chart(ctx, {
+                        // The type of chart we want to create
+                        type: 'bar',
+
+                        // The data for our dataset
+                        data: {
+                            labels: time,
+                            datasets: [{
+                                label: 'Temperature',
+                                backgroundColor: 'rgb(255, 99, 132)',
+                                borderColor: 'rgb(255, 99, 132)',
+                                data: celciustemp
+                            }]
+                        },
+
+                        // Configuration options go here
+                            options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        }
+                      
+                });
+              
+            }); 
+               
+        }
+        
+    getTemp();    
+   
+  $('#region').on('change', function() {           
+       getTemp(); 
+  });
+       
+    })(jQuery);  
+       
+       
+    </script>
+  </body>
+</html>
